@@ -1,0 +1,13 @@
+/* app css stylesheet */
+
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+@media (max-width: 970px) {
+    body {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "web-sudoku",
+  "description": "A starter project for AngularJS",
+  "version": "1.0.0",
+  "homepage": "A sudoku game using bootstrap and angular that targets all devices",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "angular": "1.2.x",
+    "angular-route": "1.2.x",
+    "angular-loader": "1.2.x",
+    "angular-mocks": "~1.2.x",
+    "html5-boilerplate": "~4.3.0",
+    "bootstrap": "~3.1.1",
+    "font-awesome": "~4.1.0"
+  }
+}
