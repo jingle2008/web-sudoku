@@ -1,0 +1,13 @@
+﻿<div class="btn-group btn-block">
+    <button type="button" class="btn btn-primary btn-block dropdown-toggle" data-toggle="dropdown">
+        <div class="row">
+            <div class="col-xs-8 col-xs-offset-1 text-left">{{options[model]}}</div>
+            <div class="col-xs-2 text-right"><span class="caret"></span></div>
+        </div>
+    </button>
+    <ul class="dropdown-menu btn-block" role="menu">
+        <li ng-repeat="option in options">
+            <a href ng-click="$parent.model = options.indexOf(option)">{{option}}</a>
+        </li>
+    </ul>
+</div>

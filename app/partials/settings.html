@@ -1,3 +1,66 @@
-﻿<div class="jumbotron">
-    <h1 class="text-center">{{name}}</h1>
+<div class="row">
+    <br />
+    <div class="col-md-8 col-md-offset-2">
+        <div class="panel panel-info">
+            <!-- Default panel contents -->
+            <div class="panel-heading">Display</div>
+            <!-- List group -->
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <jz-list-item left="9" right="3" header="Fullscreen Mode" description="Enter fullscreen mode.">
+                        <toggle-switch model="config.fullscreen" class="pull-right"></toggle-switch>
+                    </jz-list-item>
+                </li>
+                <li class="list-group-item">
+                    <jz-list-item left="8" right="4" header="Color Theme" description="Choose which color theme to use.">
+                        <jz-select model="config.scheme" options="config.schemeList"></jz-select>
+                    </jz-list-item>
+                </li>
+                <li class="list-group-item">
+                    <jz-list-item left="8" right="4" header="Colored Regions" description="Use colors to display the regions of a sudoku puzzle.">
+                        <jz-select model="config.region" options="config.regionList"></jz-select>
+                    </jz-list-item>
+                </li>
+            </ul>
+        </div>
+        <div class="panel panel-info">
+            <!-- Default panel contents -->
+            <div class="panel-heading">Behavior</div>
+            <!-- List group -->
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <jz-list-item left="8" right="4" header="Input Method" description="Choose how to enter digits during the game.">
+                        <jz-select model="config.input" options="config.inputList"></jz-select>
+                    </jz-list-item>
+                </li>
+                <li class="list-group-item">
+                    <jz-list-item left="9" right="3" header="Strict Error Checking" description="Check input against the solution of the puzzle.">
+                        <toggle-switch model="config.fullscreen" class="pull-right"></toggle-switch>
+                    </jz-list-item>
+                </li>
+            </ul>
+        </div>
+        <div class="panel panel-info">
+            <!-- Default panel contents -->
+            <div class="panel-heading">In-Game Features</div>
+            <!-- List group -->
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <jz-list-item left="8" right="4" header="Highlight Digits" description="Highlights the digit that was last entered or is currently selected.">
+                        <jz-select model="config.highlight" options="config.highlightList"></jz-select>
+                    </jz-list-item>
+                </li>
+                <li class="list-group-item">
+                    <jz-list-item left="9" right="3" header="Show Timer" description="Displays a stopwatch during the game.">
+                        <toggle-switch model="config.fullscreen" class="pull-right"></toggle-switch>
+                    </jz-list-item>
+                </li>
+                <li class="list-group-item">
+                    <jz-list-item left="9" right="3" header="Enable 'Eliminate Values'" description="Unlock the menu entry 'Eliminate Values' in the game.">
+                        <toggle-switch model="config.fullscreen" class="pull-right"></toggle-switch>
+                    </jz-list-item>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>

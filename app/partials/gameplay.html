@@ -39,13 +39,13 @@
         <hr />
         <div class="row">
             <div class="col-xs-3">
-                <a href="#" class="btn btn-primary btn-lg btn-block" data-bind="click: prevLevel">&laquo;</a>
+                <a href class="btn btn-primary btn-lg btn-block" data-bind="click: prevLevel">&laquo;</a>
             </div>
             <div class="col-xs-6">
-                <a href="#" class="btn btn-primary btn-lg btn-block" data-bind="click: start">Start Game</a>
+                <a href class="btn btn-primary btn-lg btn-block" data-bind="click: start">Start Game</a>
             </div>
             <div class="col-xs-3">
-                <a href="#" class="btn btn-primary btn-lg btn-block" data-bind="click: nextLevel">&raquo;</a>
+                <a href class="btn btn-primary btn-lg btn-block" data-bind="click: nextLevel">&raquo;</a>
             </div>
         </div>
         <!-- /ko -->
@@ -54,7 +54,7 @@
             <tbody data-bind="foreach: control().commands">
                 <tr data-bind="foreach: $data">
                     <td>
-                        @*<a href="#" class="btn btn-primary btn-block" data-bind="text: name, click: func"></a>*@
+                        @*<a href class="btn btn-primary btn-block" data-bind="text: name, click: func"></a>*@
                         <button type="button" class="btn btn-primary btn-block" data-bind="text: name, click: func"></button>
                     </td>
                 </tr>

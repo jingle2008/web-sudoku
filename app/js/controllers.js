@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-angular.module('sudokuApp.controllers', [])
+angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'])
 	.controller('MainMenuCtrl', ['$scope',
 		function($scope) {
 			$scope.isResumable = false;
@@ -16,23 +16,47 @@ angular.module('sudokuApp.controllers', [])
 		}
 	]).controller('SettingsCtrl', ['$scope',
 		function($scope) {
-			$scope.name = "Settings";
+			var config = $scope.config = {
+				name: 'Settings',
+				fullscreen: true,
+				scheme: 0,
+				schemeList: ['Classic', 'Dark'],
+				region: 0,
+				regionList: [
+					'Never',
+					'Standard',
+					'Squiggly',
+					'Always'
+				],
+				input: 0,
+				inputList: [
+					'Cell Then Values',
+					'Value Then Cells',
+					'Automatic'
+				],
+				highlight: 0,
+				highlightList: [
+					'Never',
+					'Single Values',
+					'Single & Multiple'
+				]
+			};
 		}
 	]).controller('RankingsCtrl', ['$scope',
 		function($scope) {
-			$scope.name = "Leader Boards";
+			$scope.name = 'Leader Boards';
 		}
 	]).controller('GamePlayCtrl', ['$scope',
 		function($scope) {
-			$scope.difficulty = "Easy";
-			$scope.gridStyle = "Standard";
+			$scope.difficulty = 'Easy';
+			$scope.gridStyle = 'Standard';
 			$scope.levelNo = 0;
 			$scope.totalLevel = 100;
-			$scope.timeUsed = "00:00";
+			$scope.timeUsed = '00:00';
 			$scope.level = new LevelViewModel(level);
 			$scope.readonly = true;
 			$scope.options = {};
-			
+
 			$scope.control = function() {
 				var size = $scope.level.regionSize;
 				var commands = new CommandPanelViewModel(Math.sqrt(size));

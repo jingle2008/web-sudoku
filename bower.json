@@ -12,6 +12,7 @@
     "angular-mocks": "~1.2.x",
     "html5-boilerplate": "~4.3.0",
     "bootstrap": "~3.1.1",
-    "font-awesome": "~4.1.0"
+    "font-awesome": "~4.1.0",
+    "angular-toggle-switch": "0.3.0"
   }
 }

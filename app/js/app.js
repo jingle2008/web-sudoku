@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-angular.module('sudokuApp', ['ngRoute', 'sudokuApp.controllers', 'sudokuApp.directives'])
+angular.module('sudokuApp', ['ngRoute', 'sudokuApp.controllers'])
 	.config(['$routeProvider',
 		function($routeProvider) {
 			$routeProvider.when('/home', {
@@ -20,6 +20,8 @@ angular.module('sudokuApp', ['ngRoute', 'sudokuApp.controllers', 'sudokuApp.dire
 			}).when('/gameplay', {
 				templateUrl: 'partials/gameplay.html',
 				controller: 'GamePlayCtrl'
+			}).when('/about', {
+				templateUrl: 'partials/about.html'
 			}).otherwise({
 				redirectTo: '/home'
 			});

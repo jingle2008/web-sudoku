@@ -4,7 +4,7 @@
 
 
 angular.module('sudokuApp.directives', [])
-	.directive('backButton', ['$window',
+	.directive('jzBackButton', ['$window',
 		function($window) {
 			return {
 				restrict: 'A',
@@ -15,4 +15,27 @@ angular.module('sudokuApp.directives', [])
 				}
 			};
 		}
-	]);
+	])
+	.directive('jzListItem', function() {
+		return {
+			scope: {
+				left: '@',
+				right: '@',
+				header: '@',
+				description: '@'
+			},
+			restrict: 'E',
+			templateUrl: 'partials/jzlistitem.html',
+			transclude: true
+		};
+	})
+	.directive('jzSelect', function() {
+		return {
+			scope: {
+				model: '=',
+				options: '='
+			},
+			restrict: 'E',
+			templateUrl: 'partials/jzselect.html'
+		};
+	});
