@@ -33,9 +33,16 @@ angular.module('sudokuApp.directives', [])
 		return {
 			scope: {
 				model: '=',
-				options: '='
+				options: '=',
+				select: '&',
+				button: '@'
 			},
 			restrict: 'E',
-			templateUrl: 'partials/jzselect.html'
+			templateUrl: 'partials/jzselect.html',
+			compile: function(element, attrs) {
+				if (!attrs.button) {
+					attrs.button = 'btn-default';
+				}
+			}
 		};
 	});

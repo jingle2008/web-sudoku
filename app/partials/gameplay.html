@@ -1,21 +1,16 @@
 ﻿<div class="row">
+    <br />
     <div class="col-md-8">
-        <!-- ko foreach: level.cells -->
-        <div class="square square-size-9">
+        <div class="square square-size-9" ng-repeat="cell in level.cells">
             <div class="square-content">
                 <div class="table-display">
                     <div class="table-cell-display">
-                        <!-- ko ifnot: empty -->
-                        <div class="digit-lg" data-bind="text: value, css: { 'digit-filled': fixed }"></div>
-                        <!-- /ko -->
-                        <!-- ko if: empty -->
-                        <div data-bind="text: possibleValues"></div>
-                        <!-- /ko -->
+                        <div class="digit-lg" ng-if="!cell.empty()" ng-class="{'digit-filled': cell.fixed}">{{cell.value}}</div>
+                        <div ng-if="cell.empty()">{{cell.possibleValues}}</div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- /ko -->
     </div>
     <div class="col-md-4 col-xs-12">
         <div class="row">
@@ -26,40 +21,35 @@
             </div>
             <div class="col-xs-4">
                 <h3 class="text-center">
-                    <span class="label label-info">#<span data-bind="text: levelNo"></span>/<span data-bind="text: totalLevel"></span></span>
+                    <span class="label label-info">#{{levelNo}}/{{totalLevel}}</span>
                 </h3>
             </div>
             <div class="col-xs-4">
                 <h3 class="text-right">
-                    <span class="label label-info" data-bind="text: timeUsed"></span>
+                    <span class="label label-info">{{timeUsed}}</span>
                 </h3>
             </div>
         </div>
-        <!-- ko if: readonly -->
         <hr />
-        <div class="row">
+        <div ng-if="readonly" class="row">
             <div class="col-xs-3">
-                <a href class="btn btn-primary btn-lg btn-block" data-bind="click: prevLevel">&laquo;</a>
+                <a href class="btn btn-primary btn-lg btn-block" ng-click="prevLevel()">&laquo;</a>
             </div>
             <div class="col-xs-6">
-                <a href class="btn btn-primary btn-lg btn-block" data-bind="click: start">Start Game</a>
+                <a href class="btn btn-primary btn-lg btn-block" ng-click="start()">Start Game</a>
             </div>
             <div class="col-xs-3">
-                <a href class="btn btn-primary btn-lg btn-block" data-bind="click: nextLevel">&raquo;</a>
+                <a href class="btn btn-primary btn-lg btn-block" ng-click="nextLevel()">&raquo;</a>
             </div>
         </div>
-        <!-- /ko -->
-        <!-- ko ifnot: readonly -->
-        <table class="table table-condensed">
-            <tbody data-bind="foreach: control().commands">
-                <tr data-bind="foreach: $data">
-                    <td>
-                        @*<a href class="btn btn-primary btn-block" data-bind="text: name, click: func"></a>*@
-                        <button type="button" class="btn btn-primary btn-block" data-bind="text: name, click: func"></button>
+        <table ng-if="!readonly" class="table table-condensed">
+            <tbody>
+                <tr ng-repeat="row in control.commands">
+                    <td ng-repeat="cmd in row">
+                        <button type="button" class="btn btn-primary btn-block" ng-click="cmd.func()">{{cmd.name}}</button>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <!-- /ko -->
     </div>
 </div>

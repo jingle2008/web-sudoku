@@ -1,4 +1,5 @@
 /* app css stylesheet */
+@import url(http://fonts.googleapis.com/css?family=Lato:400,900);
 
 body {
     padding-top: 50px;
@@ -9,5 +10,84 @@ body {
     body {
         padding-top: 0;
         padding-bottom: 0;
+    }
+}
+
+.square {
+    float: left;
+    position: relative;
+    overflow: hidden;
+    margin-left: -1px;
+    margin-top: -1px;
+    border: 1px solid #1e1e1e;
+    text-align: center;
+}
+
+.square-size-9 {
+    width: 11.11%;
+    padding-bottom: 11.11%;
+}
+
+.square-size-16 {
+    width: 6.25%;
+    padding-bottom: 6.25%;
+}
+
+.square-content {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.table-display {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.table-cell-display {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.nice-font-95 {
+    font-weight: 900;
+    font-size: 50px;
+}
+
+.digit-lg {
+    font-weight: 900;
+}
+
+.digit-filled, .f {
+    color: #0000ff;
+    font-style: italic;
+}
+
+@media (min-width: 320px) {
+    .digit-lg {
+        font-weight: 900;
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 480px) {
+    .digit-lg {
+        font-weight: 900;
+        font-size: 30px;
+    }
+}
+
+@media (min-width: 600px) {
+    .digit-lg {
+        font-weight: 900;
+        font-size: 40px;
+    }
+}
+
+@media (min-width: 768px) {
+    .digit-lg {
+        font-weight: 900;
+        font-size: 50px;
     }
 }

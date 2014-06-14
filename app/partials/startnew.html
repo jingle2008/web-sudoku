@@ -4,31 +4,16 @@
     <div class="col-md-6 col-md-offset-3">
         <form role="form">
             <div class="form-group">
-                <label class="control-label" for="style">Grid style</label>
-                <select id="style" name="style" class="form-control">
-                    <option>Standard</option>
-                    <option>Squiggly</option>
-                </select>
+                <label class="control-label">Grid style</label>
+                <jz-select model="config.style" options="config.styleList" select="selectStyle(o)"></jz-select>
             </div>
             <div class="form-group">
-                <label class="control-label" for="region">Extra regions</label>
-                <select id="region" name="region" class="form-control">
-                    <option>No extra regions</option>
-                    <option>X-Sudoku</option>
-                    <option>Hyper-Sudoku</option>
-                    <option>Percent-Sudoku</option>
-                    <option>Color-Sudoku</option>
-                </select>
+                <label class="control-label">Extra regions</label>
+                <jz-select model="config.region" options="config.regionList" select="selectRegion(o)"></jz-select>
             </div>
             <div class="form-group">
-                <label class="control-label" for="difficulty">Level of difficulty</label>
-                <select id="difficulty" name="difficulty" class="form-control">
-                    <option>Easy</option>
-                    <option>Medium</option>
-                    <option>Challenging</option>
-                    <option>Hard</option>
-                    <option>Fiendish</option>
-                </select>
+                <label class="control-label">Level of difficulty</label>
+                <jz-select model="config.difficulty" options="config.difficultyList" select="selectDifficulty(o)"></jz-select>
             </div>
             <div class="form-group">
                 <p class="text-info text-center">
