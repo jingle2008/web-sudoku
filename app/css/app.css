@@ -4,12 +4,14 @@
 body {
     padding-top: 50px;
     padding-bottom: 20px;
+    font-family: 'Lato',verdana, sans-serif;
 }
 
 @media (max-width: 970px) {
     body {
         padding-top: 0;
         padding-bottom: 0;
+        font-family: 'Lato',verdana, sans-serif;
     }
 }
 
@@ -17,10 +19,12 @@ body {
     float: left;
     position: relative;
     overflow: hidden;
-    margin-left: -1px;
-    margin-top: -1px;
-    border: 1px solid #1e1e1e;
     text-align: center;
+}
+
+.square-size-3 {
+    width: 33.33%;
+    padding-bottom: 33.33%;
 }
 
 .square-size-9 {
@@ -50,24 +54,49 @@ body {
     vertical-align: middle;
 }
 
+.square-border {
+    border-style: solid;
+    border-color: #1e1e1e;
+}
+
+.cell-highlight {
+    background-color: yellow;
+}
+
+.cell-selected {
+    background-color: lime;
+}
+
+.cell-fixed.cell-selected {
+    background-color: orangered;
+}
+
 .nice-font-95 {
     font-weight: 900;
     font-size: 50px;
 }
 
-.digit-lg {
+/*.digit-lg {
     font-weight: 900;
 }
 
-.digit-filled, .f {
+.digit-sm {
+    font-weight: 900;
+}*/
+
+.digit-filled {
     color: #0000ff;
-    font-style: italic;
 }
 
 @media (min-width: 320px) {
     .digit-lg {
         font-weight: 900;
-        font-size: 20px;
+        font-size: 30px;
+    }
+
+    .digit-sm {
+        font-weight: 400;
+        font-size: 12px;
     }
 }
 
@@ -76,6 +105,11 @@ body {
         font-weight: 900;
         font-size: 30px;
     }
+
+    .digit-sm {
+        font-weight: 400;
+        font-size: 12px;
+    }
 }
 
 @media (min-width: 600px) {
@@ -83,11 +117,21 @@ body {
         font-weight: 900;
         font-size: 40px;
     }
+
+    .digit-sm {
+        font-weight: 400;
+        font-size: 16px;
+    }
 }
 
 @media (min-width: 768px) {
     .digit-lg {
         font-weight: 900;
         font-size: 50px;
+    }
+
+    .digit-sm {
+        font-weight: 400;
+        font-size: 20px;
     }
 }

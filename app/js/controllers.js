@@ -2,52 +2,34 @@
 
 /* Controllers */
 
-angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'])
+angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives', 'sudokuApp.services'])
 	.controller('MainMenuCtrl', ['$scope',
 		function($scope) {
 			$scope.isResumable = false;
 		}
 	])
-	.controller('StartNewCtrl', ['$scope',
-		function($scope) {
+	.controller('StartNewCtrl', ['$scope', 'GameOption',
+		function($scope, GameOption) {
 			$scope.numSolved = 100;
 			$scope.averageTime = 100;
 			$scope.fastestTime = 100;
 
-			var config = $scope.config = {
-				style: 0,
-				styleList: ['Standard', 'Squiggly'],
-				region: 0,
-				regionList: [
-					'No extra regions',
-					'X-Sudoku',
-					'Hyper-Sudoku',
-					'Percent-Sudoku',
-					'Color-Sudoku'
-				],
-				difficulty: 0,
-				difficultyList: [
-					'Easy',
-					'Medium',
-					'Challenging',
-					'Hard',
-					'Fiendish'
-				]
-			};
+			var config = $scope.config = GameOption;
 
 			$scope.selectStyle = function(r) {
-				config.style = config.styleList.indexOf(r);
+				config.style = config.styles.indexOf(r);
 			};
 
 			$scope.selectRegion = function(o) {
-				config.region = config.regionList.indexOf(o);
+				config.region = config.regions.indexOf(o);
 			};
 
-			$scope.selectDifficulty = function(o) {
-				config.difficulty = config.difficultyList.indexOf(o);
+			$scope.selectLevel = function(o) {
+				config.level = config.levels.indexOf(o);
 			};
 		}
-	]).controller('SettingsCtrl', ['$scope',
+	])
+	.controller('SettingsCtrl', ['$scope',
 		function($scope) {
 			var config = $scope.config = {
 				name: 'Settings',
@@ -91,65 +73,30 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				config.highlight = config.highlightList.indexOf(o);
 			};
 		}
-	]).controller('RankingsCtrl', ['$scope',
+	])
+	.controller('RankingsCtrl', ['$scope',
 		function($scope) {
 			$scope.name = 'Leader Boards';
 		}
-	]).controller('GamePlayCtrl', ['$scope',
-		function($scope) {
-			$scope.difficulty = 'Easy';
-			$scope.gridStyle = 'Standard';
-			$scope.levelNo = 0;
+	])
+	.controller('GamePlayCtrl', ['$scope', 'GameOption', 'SudokuStore',
+		function($scope, GameOption, SudokuStore) {
+			var levelData = {
+				id: 0,
+				style: 0,
+				difficulty: 0,
+				timeUsed: 0,
+				size: 9,
+				mask: '011100010110010101011101110111111001001000100100111111011101110101010011010001110',
+				answer: '861739425439251678527684193293168547146573982785492316918326754354817269672945831',
+			};
+			var level;
+			var levels;
+			var puzzles = [];
+
 			$scope.totalLevel = 100;
 			$scope.timeUsed = '00:00';
-			$scope.level = new LevelViewModel(level);
 			$scope.readonly = true;
-			$scope.options = {};
-
-			$scope.keyPress = function(letter) {
-				$scope.level.setCell(letter);
-			};
-
-			$scope.makeKeyPressCallback = function(letter) {
-				return function() {
-					$scope.keyPress(letter);
-				};
-			};
-
-			var size = $scope.level.regionSize;
-			var commands = new CommandPanelViewModel(Math.sqrt(size));
-			var letters = '123456789';
-
-			switch (size) {
-				case 16:
-					letters = 'ABCDEFGHIJKLMNOP';
-					break;
-			}
-
-			for (var i = 0; i < letters.length; i++) {
-				commands.addCommand(letters[i], $scope.makeKeyPressCallback(letters[i]));
-				//commands.addCommand(letters[i], function(){console.log('x');});
-			}
-
-			$scope.control = commands;
-			// $scope.control = function() {
-			// 	var size = $scope.level.regionSize;
-			// 	var commands = new CommandPanelViewModel(Math.sqrt(size));
-			// 	var letters = '123456789';
-
-			// 	switch (size) {
-			// 		case 16:
-			// 			letters = 'ABCDEFGHIJKLMNOP';
-			// 			break;
-			// 	}
-
-			// 	for (var i = 0; i < letters.length; i++) {
-			// 		//commands.addCommand(letters[i], $scope.makeKeyPressCallback(letters[i]));
-			// 		commands.addCommand(letters[i]);
-			// 	}
-
-			// 	return commands;
-			// };
 
 			$scope.prevLevel = function() {
 				$scope.levelNo--;
@@ -163,12 +110,40 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				$scope.readonly = false;
 			};
 
+			$scope.puzzle = function() {
+				var puzzle = puzzles[$scope.levelNo];
+				if (puzzle === undefined) {
+					puzzle = new Level(levels[$scope.levelNo]);
+					puzzles[$scope.levelNo] = puzzle;
+				}
+				return puzzles[$scope.levelNo];
+			};
 
+			function keyPress(letter) {
+				level.setCell(letter);
+			}
 
-			// function makeKeyPressCallback(letter) {
-			// 	return function() {
-			// 		//$scope.keyPress(letter);
-			// 	};
-			// }
+			function createKeypad(size, keys, command) {
+				var keypad = new Keypad(Math.sqrt(size));
+				keypad.addKeys(keys.split(''), command);
+				return keypad;
+			}
+
+			function initialize() {
+				var l = GameOption.levelName();
+				var r = GameOption.regionName();
+				var s = GameOption.styleName();
+
+				$scope.difficulty = l;
+				$scope.displayName = s + '-' + r;
+
+				$scope.levelNo = 0;
+				level = new Level(levelData);
+				$scope.level = level;
+				levels = SudokuStore.getPuzzles(s, l, GameOption.size);
+				$scope.keypad = createKeypad(level.size, '123456789', keyPress);
+			}
+
+			initialize();
 		}
 	]);

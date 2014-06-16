@@ -2,18 +2,18 @@
     <h1 class="text-center nice-font-95">New Game</h1>
     <hr />
     <div class="col-md-6 col-md-offset-3">
-        <form role="form">
+        <form role="form" ng-submit="submit()">
             <div class="form-group">
                 <label class="control-label">Grid style</label>
-                <jz-select model="config.style" options="config.styleList" select="selectStyle(o)"></jz-select>
+                <jz-select model="config.style" options="config.styles" select="selectStyle(o)"></jz-select>
             </div>
             <div class="form-group">
                 <label class="control-label">Extra regions</label>
-                <jz-select model="config.region" options="config.regionList" select="selectRegion(o)"></jz-select>
+                <jz-select model="config.region" options="config.regions" select="selectRegion(o)"></jz-select>
             </div>
             <div class="form-group">
                 <label class="control-label">Level of difficulty</label>
-                <jz-select model="config.difficulty" options="config.difficultyList" select="selectDifficulty(o)"></jz-select>
+                <jz-select model="config.level" options="config.levels" select="selectLevel(o)"></jz-select>
             </div>
             <div class="form-group">
                 <p class="text-info text-center">
