@@ -165,19 +165,13 @@ function removeCandidate(cells, candidates) {
 =            Level Data Model            =
 ========================================*/
 
-function Level(data) {
+function Level(data, size) {
     var self = this;
     var fixed = [];
     var activeCell = null;
     var sameValCells = [];
 
     // Data
-    self.id = data.id;
-    self.type = data.type;
-    self.difficulty = data.difficulty;
-    self.size = data.size;
-    self.timeUsed = data.timeUsed;
-
     self.cells = [];
     self.rowCells = [];
     self.colCells = [];
@@ -186,8 +180,6 @@ function Level(data) {
 
     // Operation
     self.reset = function() {
-        self.timeUsed = 0;
-
         fixed.forEach(function(elem, idx) {
             if (!elem) {
                 self.cells[idx].reset();
@@ -238,18 +230,17 @@ function Level(data) {
     };
 
     self.getCell = function(row, col) {
-        if (row < 0 || row >= data.size || col < 0 || col >= data.size) {
+        if (row < 0 || row >= size || col < 0 || col >= size) {
             return null;
         }
 
-        return self.cells[row * data.size + col];
+        return self.cells[row * size + col];
     };
 
     // Private
     function initialize() {
         var index = 0;
         var filledCells = [];
-        var size = data.size;
 
         self.rowCells.make2d(size);
         self.colCells.make2d(size);
@@ -258,7 +249,7 @@ function Level(data) {
         for (var r = 0; r < size; r++) {
             for (var c = 0; c < size; c++) {
                 var empty = data.mask[index] === '1';
-                var value = empty ? '0' : data.answer[index];
+                var value = empty ? '0' : data.puzzle[index];
                 var rid = Math.floor(r / 3) * 3 + Math.floor(c / 3);
                 var cell = new Cell(value, !empty, r, c, rid, self);
 

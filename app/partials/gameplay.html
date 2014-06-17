@@ -1,7 +1,10 @@
 ﻿<div class="row">
     <br />
-    <div class="col-md-8" jz-center="9">
-        <jz-square size="9" border="cell.getBorders()" selected="cell.selected" highlight="cell.highlight" fixed="cell.fixed" ng-click="level.selectCell(cell)" ng-repeat="cell in puzzle().cells">
+    <div ng-if="loading">
+        <i class="fa fa-spinner fa-spin fa-5x"></i>
+    </div>
+    <div class="col-md-8" jz-center="9" ng-if="!loading">
+        <jz-square size="9" border="cell.getBorders()" selected="cell.selected" highlight="cell.highlight" fixed="cell.fixed" ng-click="puzzle.selectCell(cell)" ng-repeat="cell in puzzle.cells">
             <div class="digit-lg" ng-if="!cell.empty()" ng-class="{'digit-filled': !cell.fixed}">{{cell.value}}</div>
             <div ng-if="cell.empty()">
                 <jz-square size="3" ng-repeat="cand in cell.candidates">
@@ -26,7 +29,7 @@
             </div>
             <div class="col-xs-4">
                 <h3 class="text-center">
-                    <span class="label label-info">#{{levelNo}}/{{totalLevel}}</span>
+                    <span class="label label-info">#{{puzzleId + 1}}/{{totalPuzzles}}</span>
                 </h3>
             </div>
             <div class="col-xs-4">

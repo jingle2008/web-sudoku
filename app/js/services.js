@@ -20,7 +20,8 @@ angular.module('sudokuApp.services', ['firebase'])
 			var levels = [
 				'Easy', 'Medium', 'Hard', 'Evil'
 			];
-			var puzzles = [];
+			var loadedPuzzles = {};
+
 			// var curStyle, curLevel;
 
 			// function styleUrl() {
@@ -39,6 +40,28 @@ angular.module('sudokuApp.services', ['firebase'])
 			// 		});
 			// 	});
 			// }
+			// 
+
+			function loadPuzzles(style, level, size, loadedCallback) {
+				var key = [style, level, size].join();
+				var puzzles = loadedPuzzles[key];
+				if (puzzles !== undefined) {
+					loadedCallback(puzzles);
+					return;
+				}
+
+				loadedPuzzles[key] = puzzles = [];
+
+				var path = [url, style, level, size];
+				var puzzleRef = $firebase(new Firebase(path.join('/')));
+				puzzleRef.$on('child_added', function(child) {
+					puzzles.push(child.snapshot.value);
+				});
+
+				puzzleRef.$on('loaded', function() {
+					loadedCallback(puzzles);
+				});
+			}
 
 			function getRegions(level) {
 				return regions;
@@ -52,27 +75,11 @@ angular.module('sudokuApp.services', ['firebase'])
 				return levels;
 			}
 
-			function getPuzzles(style, level, size) {
-				// var path = [url, style, level, size];
-				// var ref = new Firebase(path.join('/'));
-				// ref.on('child_added', function(snapshot) {
-				// 	puzzles.push(snapshot.val());
-				// });
-
-				// return puzzles;
-				var ref = new Firebase(url);
-				ref.set({
-					levels: [1, 2, 3],
-					styles: 'test'
-				});
-				console.log(ref.name());
-			}
-
 			return {
 				getLevels: getLevels,
 				getRegions: getRegions,
 				getStyles: getStyles,
-				getPuzzles: getPuzzles
+				loadPuzzles: loadPuzzles
 			};
 		}
 	])

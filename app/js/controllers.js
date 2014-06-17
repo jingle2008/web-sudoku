@@ -90,33 +90,36 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				mask: '011100010110010101011101110111111001001000100100111111011101110101010011010001110',
 				answer: '861739425439251678527684193293168547146573982785492316918326754354817269672945831',
 			};
-			var level;
-			var levels;
 			var puzzles = [];
+			var puzzleData = [];
 
-			$scope.totalLevel = 100;
+			$scope.puzzleId = 0;
+			$scope.totalPuzzles = 'NA';
 			$scope.timeUsed = '00:00';
 			$scope.readonly = true;
+			$scope.loading = true;
 
 			$scope.prevLevel = function() {
-				$scope.levelNo--;
+				$scope.puzzleId--;
+				$scope.puzzle = getPuzzle();
 			};
 
 			$scope.nextLevel = function() {
-				$scope.levelNo++;
+				$scope.puzzleId++;
+				$scope.puzzle = getPuzzle();
 			};
 
 			$scope.start = function() {
 				$scope.readonly = false;
 			};
 
-			$scope.puzzle = function() {
-				var puzzle = puzzles[$scope.levelNo];
+			function getPuzzle() {
+				var idx = $scope.puzzleId;
+				var puzzle = puzzles[idx];
 				if (puzzle === undefined) {
-					puzzle = new Level(levels[$scope.levelNo]);
-					puzzles[$scope.levelNo] = puzzle;
+					puzzles[idx] = puzzle = new Level(puzzleData[idx], GameOption.size);
 				}
-				return puzzles[$scope.levelNo];
+				return puzzle;
 			};
 
 			function keyPress(letter) {
@@ -137,11 +140,14 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				$scope.difficulty = l;
 				$scope.displayName = s + '-' + r;
 
-				$scope.levelNo = 0;
-				level = new Level(levelData);
-				$scope.level = level;
-				levels = SudokuStore.getPuzzles(s, l, GameOption.size);
-				$scope.keypad = createKeypad(level.size, '123456789', keyPress);
+				SudokuStore.loadPuzzles(s, l, GameOption.size, function(data) {
+					puzzleData = data;
+					$scope.totalPuzzles = puzzleData.length;
+					$scope.puzzle = getPuzzle();
+					$scope.loading = false;
+				});
+
+				$scope.keypad = createKeypad(GameOption.size, '123456789', keyPress);
 			}
 
 			initialize();
