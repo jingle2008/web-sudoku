@@ -170,6 +170,7 @@ function Level(data, size) {
     var fixed = [];
     var activeCell = null;
     var sameValCells = [];
+    var highlightVal = null;
 
     // Data
     self.cells = [];
@@ -193,14 +194,38 @@ function Level(data, size) {
         }
 
         activeCell.setValue(letter);
+
+        if (highlightVal === letter) {
+            activeCell.highlight = true;
+            sameValCells.push(activeCell);
+        } else {
+            self.highlightVals(letter);
+        }
+    };
+
+    self.highlightVals = function(val) {
+        if (highlightVal === val) {
+            return;
+        }
+
+        highlightVal = val;
+
+        sameValCells.forEach(function(cell) {
+            cell.highlight = false;
+        });
+
+        var cells = self.getSameValCells(val);
+        cells.forEach(function(cell) {
+            cell.highlight = true;
+        });
+
+        sameValCells = cells;
     };
 
     self.selectCell = function(cell) {
         if (cell === activeCell) {
             return;
         }
-
-        var prveCell = activeCell;
 
         if (activeCell !== null) {
             activeCell.selected = false;
@@ -209,24 +234,9 @@ function Level(data, size) {
         cell.selected = true;
         activeCell = cell;
 
-        if (prveCell !== null && prveCell.value === cell.value) {
-            return;
+        if (!cell.empty()) {
+            self.highlightVals(cell.value);
         }
-
-        sameValCells.forEach(function(cell) {
-            cell.highlight = false;
-        });
-
-        if (cell.empty()) {
-            return;
-        }
-
-        var cells = self.getSameValCells(cell.value);
-        cells.forEach(function(cell) {
-            cell.highlight = true;
-        });
-
-        sameValCells = cells;
     };
 
     self.getCell = function(row, col) {

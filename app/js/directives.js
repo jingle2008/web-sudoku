@@ -33,6 +33,10 @@ angular.module('sudokuApp.directives', [])
 		return {
 			restrict: 'A',
 			link: function(scope, element, attrs) {
+				if (!attrs.jzBorderWidth) {
+					return;
+				}
+
 				var arr = attrs.jzBorderWidth.split(' ');
 				element.addClass('square-border').css({
 					'border-top-width': arr[0] + 'px',

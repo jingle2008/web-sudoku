@@ -76,13 +76,12 @@ body {
     font-size: 50px;
 }
 
-/*.digit-lg {
-    font-weight: 900;
+.disabled {
+    z-index: 1000;
+    background-color: lightgrey;
+    opacity: 0.6;
+    pointer-events: none;
 }
-
-.digit-sm {
-    font-weight: 900;
-}*/
 
 .digit-filled {
     color: #0000ff;

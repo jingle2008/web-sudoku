@@ -109,6 +109,14 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				$scope.puzzle = getPuzzle();
 			};
 
+			$scope.canGoPrev = function() {
+				return ($scope.puzzleId > 0);
+			};
+
+			$scope.canGoNext = function() {
+				return ($scope.puzzleId + 1 < $scope.totalPuzzles);
+			};
+
 			$scope.start = function() {
 				$scope.readonly = false;
 			};
@@ -123,7 +131,7 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 			};
 
 			function keyPress(letter) {
-				level.setCell(letter);
+				$scope.puzzle.setCell(letter);
 			}
 
 			function createKeypad(size, keys, command) {
