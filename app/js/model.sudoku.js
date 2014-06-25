@@ -1,13 +1,13 @@
 ﻿'use strict';
 
-var nineDigits = '123456789';
-var sixteenDigits = 'ABCDEFGHIJKLMNOP';
+var nineCands = '123456789';
+var sixteenCands = 'ABCDEFGHIJKLMNOP';
 
-function getLetters(size) {
+function getAllCands(size) {
     if (size === 9) {
-        return nineDigits.split('');
+        return nineCands.split('');
     } else if (size === 16) {
-        return sixteenDigits.split('');
+        return sixteenCands.split('');
     }
 
     assert(false, 'Only size 9 and 16 are supported.');
@@ -17,7 +17,7 @@ function getLetters(size) {
 =            Cell Data Model            =
 =======================================*/
 
-function Cell(value, fixed, row, column, regionId, level) {
+function Cell(value, fixed, row, column, regionId, puzzle) {
     var self = this;
 
     // Data
@@ -26,7 +26,7 @@ function Cell(value, fixed, row, column, regionId, level) {
     self.location = new Point(column, row);
     self.regionId = regionId;
     self.candidates = [];
-    self.level = level;
+    self.puzzle = puzzle;
 
     // UI state
     self.selected = false;
@@ -41,8 +41,8 @@ function Cell(value, fixed, row, column, regionId, level) {
     function initialize(val) {
         self.value = val;
 
-        if (self.smartCand && self.empty()) {
-            self.candidates = getLetters(level.size);
+        if (self.options.smartCand && self.empty()) {
+            self.candidates = puzzle.allCands.slice(0);
         } else {
             self.candidates = [];
         }
@@ -52,7 +52,7 @@ function Cell(value, fixed, row, column, regionId, level) {
 }
 
 Cell.prototype.options = {
-    smartCand: false,
+    smartCand: true,
 };
 
 Cell.prototype.empty = function() {
@@ -87,10 +87,10 @@ Cell.prototype.getBorders = function() {
     var x = this.location.x;
     var y = this.location.y;
 
-    var top = this.level.getCell(y - 1, x);
-    var right = this.level.getCell(y, x + 1);
-    var bottom = this.level.getCell(y + 1, x);
-    var left = this.level.getCell(y, x - 1);
+    var top = this.puzzle.getCell(y - 1, x);
+    var right = this.puzzle.getCell(y, x + 1);
+    var bottom = this.puzzle.getCell(y + 1, x);
+    var left = this.puzzle.getCell(y, x - 1);
 
     borders.push(this.getBorder(top, 0));
     borders.push(this.getBorder(right, 1));
@@ -133,10 +133,14 @@ Cell.prototype.setValue = function(value) {
 
     this.value = value;
 
-    if (this.smartCand) {
+    if (this.options.smartCand) {
         this.candidates.clear();
-        this.level.update(this);
+        this.puzzle.update(this);
     }
+};
+
+Cell.prototype.hasCand = function(cand) {
+    return this.candidates.contains(cand);
 };
 
 /*-----  End of Cell Data Model  ------*/
@@ -162,10 +166,10 @@ function removeCandidate(cells, candidates) {
 /*-----  End of Utility Functions  ------*/
 
 /*========================================
-=            Level Data Model            =
+=            Puzzle Data Model           =
 ========================================*/
 
-function Level(data, size) {
+function Puzzle(data, size) {
     var self = this;
     var fixed = [];
     var activeCell = null;
@@ -178,6 +182,8 @@ function Level(data, size) {
     self.colCells = [];
     self.regCells = [];
     self.emptyCells = 0;
+    self.size = size;
+    self.allCands = getAllCands(size);
 
     // Operation
     self.reset = function() {
@@ -277,37 +283,37 @@ function Level(data, size) {
         }
 
         self.emptyCells = index;
-        if (Cell.prototype.smartCand) {
-            filledCells.forEach(Level.prototype.update.bind(self));
+        if (Cell.prototype.options.smartCand) {
+            filledCells.forEach(Puzzle.prototype.update.bind(self));
         }
     }
 
     initialize();
 }
 
-Level.prototype.isSolved = function() {
+Puzzle.prototype.isSolved = function() {
     return (this.emptyCells === 0);
 };
 
-Level.prototype.getCellsInRow = function(row) {
+Puzzle.prototype.getCellsInRow = function(row) {
     return getEmptyCells(this.rowCells[row]);
 };
 
-Level.prototype.getCellsInCol = function(column) {
+Puzzle.prototype.getCellsInCol = function(column) {
     return getEmptyCells(this.colCells[column]);
 };
 
-Level.prototype.getCellsInReg = function(regionId) {
+Puzzle.prototype.getCellsInReg = function(regionId) {
     return getEmptyCells(this.regCells[regionId]);
 };
 
-Level.prototype.getSameValCells = function(value) {
+Puzzle.prototype.getSameValCells = function(value) {
     return this.cells.filter(function(cell) {
         return (value === cell.value);
     });
 };
 
-Level.prototype.update = function(cell) {
+Puzzle.prototype.update = function(cell) {
     if (cell.empty()) {
         return;
     }
@@ -318,25 +324,31 @@ Level.prototype.update = function(cell) {
     // update affected cells
     removeCandidate(
         [].concat(
-            this.getCellsInRow(cell.row, true),
-            this.getCellsInCol(cell.column, true),
+            this.getCellsInRow(cell.location.y, true),
+            this.getCellsInCol(cell.location.x, true),
             this.getCellsInReg(cell.regionId, true)
         ).unique(), [cell.value]);
 };
 
-Level.prototype.updateRow = function(row, candidates) {
+Puzzle.prototype.updateRow = function(row, candidates) {
     // update affected cells
     removeCandidate(this.getCellsInRow(row, true), candidates);
 };
 
-Level.prototype.updateColumn = function(column, candidates) {
+Puzzle.prototype.updateColumn = function(column, candidates) {
     // update affected cells
     removeCandidate(this.getCellsInCol(column, true), candidates);
 };
 
-Level.prototype.updateRegion = function(region, candidates) {
+Puzzle.prototype.updateRegion = function(region, candidates) {
     // update affected cells
     removeCandidate(this.getCellsInReg(region, true), candidates);
 };
 
-/*-----  End of Level Data Model  ------*/
+Puzzle.prototype.enableSmartCand = function(enable) {
+    Cell.prototype.options.smartCand = enable;
+
+    //this.cells.forEach(Puzzle.prototype.update.bind(self));
+};
+
+/*-----  End of Puzzle Data Model  ------*/

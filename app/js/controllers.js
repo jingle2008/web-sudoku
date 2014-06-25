@@ -95,16 +95,17 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 
 			$scope.puzzleId = 0;
 			$scope.totalPuzzles = 'NA';
-			$scope.timeUsed = '00:00';
+			$scope.timeUsed = '0';
+			$scope.timerAction = '';
 			$scope.readonly = true;
 			$scope.loading = true;
 
-			$scope.prevLevel = function() {
+			$scope.prevPuzzle = function() {
 				$scope.puzzleId--;
 				$scope.puzzle = getPuzzle();
 			};
 
-			$scope.nextLevel = function() {
+			$scope.nextPuzzle = function() {
 				$scope.puzzleId++;
 				$scope.puzzle = getPuzzle();
 			};
@@ -117,15 +118,16 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				return ($scope.puzzleId + 1 < $scope.totalPuzzles);
 			};
 
-			$scope.start = function() {
+			$scope.startGame = function() {
 				$scope.readonly = false;
+				$scope.timerAction = 'start';
 			};
 
 			function getPuzzle() {
 				var idx = $scope.puzzleId;
 				var puzzle = puzzles[idx];
 				if (puzzle === undefined) {
-					puzzles[idx] = puzzle = new Level(puzzleData[idx], GameOption.size);
+					puzzles[idx] = puzzle = new Puzzle(puzzleData[idx], GameOption.size);
 				}
 				return puzzle;
 			};
@@ -156,6 +158,10 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				});
 
 				$scope.keypad = createKeypad(GameOption.size, '123456789', keyPress);
+				$scope.keypad.addKey('Smart', function () {
+					Cell.prototype.options.smartCand = true;
+					$scope.puzzle.enableSmartCand(true);
+				});
 			}
 
 			initialize();

@@ -1,54 +1,51 @@
 ﻿<div class="row">
-    <br />
     <div ng-if="loading" class="col-md-12">
+        <br />
         <i class="fa fa-cog fa-spin fa-5x"></i>
         <span class="nice-font-95">Loading puzzles...</span>
     </div>
-    <div ng-if="!loading" ng-class="{disabled: readonly}" class="col-md-8" jz-center="9">
-        <jz-square size="9" border="cell.getBorders()" selected="cell.selected" highlight="cell.highlight" fixed="cell.fixed" ng-click="puzzle.selectCell(cell)" ng-repeat="cell in puzzle.cells">
-            <div class="digit-lg" ng-if="!cell.empty()" ng-class="{'digit-filled': !cell.fixed}">{{cell.value}}</div>
-            <div ng-if="cell.empty()">
-                <jz-square size="3" ng-repeat="cand in cell.candidates">
-                    <div class="digit-sm">{{cand}}</div>
-                </jz-square>
-            </div>
-        </jz-square>
-    </div>
-    <div ng-if="!loading" class="col-md-4 col-xs-12">
+    <div ng-if="!loading" class="col-md-8">
         <div class="row">
-            <div class="col-xs-12">
-                <h3 class="text-left">
-                    <span class="label label-info">{{displayName}}</span>
-                </h3>
+            <div class="col-xs-6">
+                <h4 class="text-left">{{displayName}}</h4>
+            </div>
+            <div class="col-xs-3">
+                <h4 class="text-center">{{difficulty}}</h4>
+            </div>
+            <div class="col-xs-3">
+                <h4 class="text-right">#{{puzzleId + 1}}/{{totalPuzzles}}</h4>
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-4">
-                <h3 class="text-left">
-                    <span class="label label-info">{{difficulty}}</span>
-                </h3>
+            <div class="col-md-12" ng-class="{disabled: readonly}" jz-center="9">
+                <jz-square size="9" border="cell.getBorders()" selected="cell.selected" highlight="cell.highlight" fixed="cell.fixed" ng-click="puzzle.selectCell(cell)" ng-repeat="cell in puzzle.cells">
+                    <div class="digit-lg" ng-if="!cell.empty()" ng-class="{'digit-filled': !cell.fixed}">{{cell.value}}</div>
+                    <div ng-if="cell.empty()">
+                        <jz-square size="3" ng-repeat="cand in puzzle.allCands">
+                            <div class="digit-sm" ng-if="cell.hasCand(cand)">{{cand}}</div>
+                        </jz-square>
+                    </div>
+                </jz-square>
             </div>
-            <div class="col-xs-4">
-                <h3 class="text-center">
-                    <span class="label label-info">#{{puzzleId + 1}}/{{totalPuzzles}}</span>
-                </h3>
-            </div>
-            <div class="col-xs-4">
-                <h3 class="text-right">
-                    <span class="label label-info">{{timeUsed}}</span>
-                </h3>
+        </div>
+    </div>
+    <div ng-if="!loading" class="col-md-4 col-xs-12">
+        <br />
+        <div class="row">
+            <div class="col-md-12 center-block">
+                <jz-flip-clock time-used="{{timeUsed}}" action="timerAction"></jz-flip-clock>
             </div>
         </div>
         <hr />
         <div ng-if="readonly" class="row">
             <div class="col-xs-3">
-                <a href class="btn btn-primary btn-lg btn-block" ng-disabled="!canGoPrev()" ng-click="prevLevel()">&laquo;</a>
+                <a href class="btn btn-primary btn-lg btn-block" ng-disabled="!canGoPrev()" ng-click="prevPuzzle()">&laquo;</a>
             </div>
             <div class="col-xs-6">
-                <a href class="btn btn-primary btn-lg btn-block" ng-click="start()">Start Game</a>
+                <a href class="btn btn-primary btn-lg btn-block" ng-click="startGame()">Start Game</a>
             </div>
             <div class="col-xs-3">
-                <a href class="btn btn-primary btn-lg btn-block" ng-disabled="!canGoNext()" ng-click="nextLevel()">&raquo;</a>
+                <a href class="btn btn-primary btn-lg btn-block" ng-disabled="!canGoNext()" ng-click="nextPuzzle()">&raquo;</a>
             </div>
         </div>
         <table ng-if="!readonly" class="table table-condensed">

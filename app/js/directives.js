@@ -80,6 +80,33 @@ angular.module('sudokuApp.directives', [])
 			}
 		};
 	})
+	.directive('jzFlipClock', function($parse) {
+		return {
+			restrict: 'E',
+			template: '<div></div>',
+			replace: true,
+			link: function(scope, element, attrs) {
+				var action = $parse(attrs.action);
+				var timeUsed = $parse(attrs.timeUsed);
+
+				var clock = element.FlipClock(attrs.timeUsed, {
+					clockFace: 'MinuteCounter',
+					autoStart: false
+				});
+
+				scope.$watch(action, function(val) {
+					if (val === 'start') {
+						clock.start();
+					} else if (val === "stop") {
+						clock.stop();
+						scope.$apply(function(scope) {
+							timeUsed.assign(scope, clock.getTime());
+						});
+					}
+				});
+			}
+		};
+	})
 	.directive('jzSelect', function() {
 		return {
 			scope: {
