@@ -55,4 +55,16 @@ Array.prototype.make2d = function(size) {
     return this;
 };
 
+Array.prototype.groupBy = function(fnKey) {
+    var groups = {};
+
+    this.forEach(function(obj) {
+        var key = fnKey(obj);
+        groups[key] = groups[key] || [];
+        groups[key].push(obj);
+    });
+
+    return groups;
+};
+
 /*-----  End of Array Extensions  ------*/

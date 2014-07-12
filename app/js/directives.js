@@ -85,23 +85,30 @@ angular.module('sudokuApp.directives', [])
 			restrict: 'E',
 			template: '<div></div>',
 			replace: true,
-			link: function(scope, element, attrs) {
-				var action = $parse(attrs.action);
-				var timeUsed = $parse(attrs.timeUsed);
-
-				var clock = element.FlipClock(attrs.timeUsed, {
+			require: 'ngModel',
+			link: function(scope, element, attrs, ngModel) {
+				var clock = element.FlipClock(0, {
 					clockFace: 'MinuteCounter',
-					autoStart: false
+					autoStart: false,
+					callbacks: {
+						interval: function() {
+							console.log(clock.getTime().time);
+							scope.$apply(function() {
+								ngModel.$setViewValue(clock.getTime().time);
+							});
+						}
+					}
 				});
 
-				scope.$watch(action, function(val) {
+				ngModel.$render = function() {
+					clock.setTime(ngModel.$viewValue);
+				};
+
+				scope.$watch(attrs.action, function(val) {
 					if (val === 'start') {
 						clock.start();
 					} else if (val === "stop") {
 						clock.stop();
-						scope.$apply(function(scope) {
-							timeUsed.assign(scope, clock.getTime());
-						});
 					}
 				});
 			}

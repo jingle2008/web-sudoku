@@ -2,6 +2,7 @@
 
 var nineCands = '123456789';
 var sixteenCands = 'ABCDEFGHIJKLMNOP';
+var emptyCellVal = '0';
 
 function getAllCands(size) {
     if (size === 9) {
@@ -34,7 +35,7 @@ function Cell(value, fixed, row, column, regionId, puzzle) {
 
     // Operation
     self.reset = function() {
-        initialize(self.fixed ? value : '0');
+        initialize(self.fixed ? value : emptyCellVal);
     };
 
     // Private
@@ -56,7 +57,11 @@ Cell.prototype.options = {
 };
 
 Cell.prototype.empty = function() {
-    return (this.value === '0');
+    return this.emptyVal(this.value);
+};
+
+Cell.prototype.emptyVal = function(value) {
+    return (value === emptyCellVal);
 };
 
 Cell.prototype.isSolvable = function() {
@@ -101,12 +106,28 @@ Cell.prototype.getBorders = function() {
 };
 
 Cell.prototype.setValue = function(value) {
+    this.value = value;
+    this.candidates.clear();
+
+    this.puzzle.emptyCells--;
+
+    if (this.options.smartCand) {
+        this.puzzle.update(this);
+    }
+};
+
+Cell.prototype.unsetValue = function() {
+    this.value = emptyCellVal;
+    this.puzzle.emptyCells++;
+};
+
+Cell.prototype.inputValue = function(value) {
     if (this.fixed) {
         return;
     }
 
     if (this.value === value) {
-        this.value = '0';
+        this.unsetValue();
         return;
     }
 
@@ -114,8 +135,7 @@ Cell.prototype.setValue = function(value) {
         this.candidates.remove(value);
 
         if (this.isSolvable()) {
-            this.value = this.candidates[0];
-            this.candidates.clear();
+            this.setValue(this.candidates[0]);
         }
 
         return;
@@ -123,7 +143,7 @@ Cell.prototype.setValue = function(value) {
 
     if (!this.empty()) {
         this.candidates.push(this.value);
-        this.value = '0';
+        this.unsetValue();
     }
 
     if (this.candidates.length > 0) {
@@ -131,12 +151,7 @@ Cell.prototype.setValue = function(value) {
         return;
     }
 
-    this.value = value;
-
-    if (this.options.smartCand) {
-        this.candidates.clear();
-        this.puzzle.update(this);
-    }
+    this.setValue(value);
 };
 
 Cell.prototype.hasCand = function(cand) {
@@ -156,6 +171,31 @@ function getEmptyCells(cells) {
     });
 }
 
+// Get all filled cells in set
+function getFilledCells(cells) {
+    return cells.filter(function(cell) {
+        return !cell.empty();
+    });
+}
+
+function getCellValue(cell) {
+    return cell.value;
+}
+
+// Get all duplicate cells in set
+function getDuplicateCells(cells) {
+    var dict = getFilledCells(cells).groupBy(getCellValue);
+
+    var dupArray = [];
+    for (var prop in dict) {
+        if (dict[prop].length > 1) {
+            dupArray.push(dict[prop]);
+        }
+    }
+
+    return dupArray;
+}
+
 // Remove candidates from all cells
 function removeCandidate(cells, candidates) {
     cells.forEach(function(cell) {
@@ -165,6 +205,70 @@ function removeCandidate(cells, candidates) {
 
 /*-----  End of Utility Functions  ------*/
 
+function HighlightGroup(cells) {
+    var self = this;
+    var state = false;
+
+    self.highlight = function(on) {
+        state = on;
+
+        cells.forEach(function(cell) {
+            cell.highlight = on;
+        });
+    };
+
+    self.add = function(cell) {
+        if (cells.contains(cell)) {
+            return;
+        }
+
+        cell.highlight = state;
+        cells.push(cell);
+    };
+
+    self.remove = function(cell) {
+        cell.highlight = false;
+        cells.remove(cell);
+    };
+}
+
+function HighlightManager() {
+    var self = this;
+    var groups = {};
+    var currentValue = null;
+
+    function getGroup(value) {
+        groups[value] = groups[value] || new HighlightGroup([]);
+        return groups[value];
+    }
+
+    self.build = function(cells) {
+        var dict = cells.groupBy(getCellValue);
+
+        for (var key in dict) {
+            groups[key] = new HighlightGroup(dict[key]);
+        }
+    };
+
+    self.highlight = function(value) {
+        if (currentValue === value) {
+            return;
+        }
+
+        getGroup(currentValue).highlight(false);
+        currentValue = value;
+        getGroup(currentValue).highlight(true);
+    };
+
+    self.update = function(cell, oldValue) {
+        if (cell.empty()) {
+            getGroup(oldValue).remove(cell);
+        } else {
+            getGroup(cell.value).add(cell);
+        }
+    };
+}
+
 /*========================================
 =            Puzzle Data Model           =
 ========================================*/
@@ -173,8 +277,7 @@ function Puzzle(data, size) {
     var self = this;
     var fixed = [];
     var activeCell = null;
-    var sameValCells = [];
-    var highlightVal = null;
+    var highlightMgr = new HighlightManager();
 
     // Data
     self.cells = [];
@@ -183,6 +286,7 @@ function Puzzle(data, size) {
     self.regCells = [];
     self.emptyCells = 0;
     self.size = size;
+    self.timeUsed = 0;
     self.allCands = getAllCands(size);
 
     // Operation
@@ -194,41 +298,23 @@ function Puzzle(data, size) {
         });
     };
 
-    self.setCell = function(letter) {
+    self.setCell = function(value) {
         if (activeCell === null || activeCell.fixed) {
             return;
         }
 
-        activeCell.setValue(letter);
+        var oldValue = activeCell.value;
+        activeCell.inputValue(value);
 
-        if (highlightVal === letter) {
-            activeCell.highlight = true;
-            sameValCells.push(activeCell);
-        } else {
-            self.highlightVals(letter);
-        }
-    };
-
-    self.highlightVals = function(val) {
-        if (highlightVal === val) {
-            return;
-        }
-
-        highlightVal = val;
-
-        sameValCells.forEach(function(cell) {
-            cell.highlight = false;
-        });
-
-        var cells = self.getSameValCells(val);
-        cells.forEach(function(cell) {
-            cell.highlight = true;
-        });
-
-        sameValCells = cells;
+        highlightMgr.update(activeCell, oldValue);
+        highlightMgr.highlight(value);
     };
 
     self.selectCell = function(cell) {
+        if (!cell.empty()) {
+            highlightMgr.highlight(cell.value);
+        }
+
         if (cell === activeCell) {
             return;
         }
@@ -239,18 +325,6 @@ function Puzzle(data, size) {
 
         cell.selected = true;
         activeCell = cell;
-
-        if (!cell.empty()) {
-            self.highlightVals(cell.value);
-        }
-    };
-
-    self.getCell = function(row, col) {
-        if (row < 0 || row >= size || col < 0 || col >= size) {
-            return null;
-        }
-
-        return self.cells[row * size + col];
     };
 
     // Private
@@ -265,7 +339,7 @@ function Puzzle(data, size) {
         for (var r = 0; r < size; r++) {
             for (var c = 0; c < size; c++) {
                 var empty = data.mask[index] === '1';
-                var value = empty ? '0' : data.puzzle[index];
+                var value = empty ? emptyCellVal : data.puzzle[index];
                 var rid = Math.floor(r / 3) * 3 + Math.floor(c / 3);
                 var cell = new Cell(value, !empty, r, c, rid, self);
 
@@ -282,17 +356,51 @@ function Puzzle(data, size) {
             }
         }
 
-        self.emptyCells = index;
+        self.emptyCells = index - filledCells.length;
         if (Cell.prototype.options.smartCand) {
             filledCells.forEach(Puzzle.prototype.update.bind(self));
         }
+
+        highlightMgr.build(filledCells);
     }
 
     initialize();
 }
 
-Puzzle.prototype.isSolved = function() {
-    return (this.emptyCells === 0);
+Puzzle.prototype.getCell = function(row, col) {
+    var size = this.size;
+
+    if (row < 0 || row >= size || col < 0 || col >= size) {
+        return null;
+    }
+
+    return this.cells[row * size + col];
+};
+
+Puzzle.prototype.checkSolved = function() {
+    if (this.emptyCells !== 0) {
+        return false;
+    }
+
+    return this.validate();
+};
+
+Puzzle.prototype.validate = function() {
+    return !(this.rowCells.some(function(cells) {
+        return getDuplicateCells(cells).length > 0;
+    }) || this.colCells.some(function(cells) {
+        return getDuplicateCells(cells).length > 0;
+    }) || this.regCells.some(function(cells) {
+        return getDuplicateCells(cells).length > 0;
+    }));
+};
+
+Puzzle.prototype.autoResolve = function() {
+    this.cells.forEach(function(cell) {
+        if (cell.isSolvable()) {
+            cell.setValue(cell.candidates[0]);
+        }
+    });
 };
 
 Puzzle.prototype.getCellsInRow = function(row) {
@@ -318,31 +426,28 @@ Puzzle.prototype.update = function(cell) {
         return;
     }
 
-    // remove from empty list
-    this.emptyCells--;
-
     // update affected cells
     removeCandidate(
         [].concat(
-            this.getCellsInRow(cell.location.y, true),
-            this.getCellsInCol(cell.location.x, true),
-            this.getCellsInReg(cell.regionId, true)
+            this.getCellsInRow(cell.location.y),
+            this.getCellsInCol(cell.location.x),
+            this.getCellsInReg(cell.regionId)
         ).unique(), [cell.value]);
 };
 
 Puzzle.prototype.updateRow = function(row, candidates) {
     // update affected cells
-    removeCandidate(this.getCellsInRow(row, true), candidates);
+    removeCandidate(this.getCellsInRow(row), candidates);
 };
 
 Puzzle.prototype.updateColumn = function(column, candidates) {
     // update affected cells
-    removeCandidate(this.getCellsInCol(column, true), candidates);
+    removeCandidate(this.getCellsInCol(column), candidates);
 };
 
 Puzzle.prototype.updateRegion = function(region, candidates) {
     // update affected cells
-    removeCandidate(this.getCellsInReg(region, true), candidates);
+    removeCandidate(this.getCellsInReg(region), candidates);
 };
 
 Puzzle.prototype.enableSmartCand = function(enable) {

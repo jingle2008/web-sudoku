@@ -1,8 +1,14 @@
 ﻿<div class="row">
     <div ng-if="loading" class="col-md-12">
         <br />
-        <i class="fa fa-cog fa-spin fa-5x"></i>
-        <span class="nice-font-95">Loading puzzles...</span>
+        <div ng-if="!emptyLevel">
+            <i class="fa fa-cog fa-spin fa-5x"></i>
+            <span class="nice-font-95">Loading puzzles...</span>
+        </div>
+        <div ng-if="emptyLevel">
+            <i class="fa fa-warning fa-5x"></i>
+            <span class="nice-font-95">No puzzles found!</span>
+        </div>
     </div>
     <div ng-if="!loading" class="col-md-8">
         <div class="row">
@@ -17,7 +23,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12" ng-class="{disabled: readonly}" jz-center="9">
+            <div class="col-md-12" ng-class="{disabled: readonly || solved}" jz-center="9">
                 <jz-square size="9" border="cell.getBorders()" selected="cell.selected" highlight="cell.highlight" fixed="cell.fixed" ng-click="puzzle.selectCell(cell)" ng-repeat="cell in puzzle.cells">
                     <div class="digit-lg" ng-if="!cell.empty()" ng-class="{'digit-filled': !cell.fixed}">{{cell.value}}</div>
                     <div ng-if="cell.empty()">
@@ -32,8 +38,8 @@
     <div ng-if="!loading" class="col-md-4 col-xs-12">
         <br />
         <div class="row">
-            <div class="col-md-12 center-block">
-                <jz-flip-clock time-used="{{timeUsed}}" action="timerAction"></jz-flip-clock>
+            <div class="col-md-12 center-block input-disabled">
+                <jz-flip-clock ng-model="puzzle.timeUsed" action="timerAction"></jz-flip-clock>
             </div>
         </div>
         <hr />
@@ -48,14 +54,27 @@
                 <a href class="btn btn-primary btn-lg btn-block" ng-disabled="!canGoNext()" ng-click="nextPuzzle()">&raquo;</a>
             </div>
         </div>
-        <table ng-if="!readonly" class="table table-condensed">
-            <tbody>
-                <tr ng-repeat="keyrow in keypad.keys">
-                    <td ng-repeat="key in keyrow">
-                        <button type="button" class="btn btn-primary btn-block" ng-click="key.command()">{{key.text}}</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div ng-if="!readonly" class="row">
+            <div ng-if="!solved" class="col-sm-12">
+                <table class="table table-condensed">
+                    <tbody>
+                        <tr ng-repeat="keyrow in keypad.keys">
+                            <td ng-repeat="key in keyrow">
+                                <button type="button" class="btn btn-primary btn-block" ng-click="key.command()">{{key.text}}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div ng-if="solved" class="col-sm-12">
+                <h3>Congratulations! you have solved this puzzle!</h3>
+                <div class="col-xs-6">
+                    <a href class="btn btn-info btn-lg btn-block" ng-click="submitScore()">Submit Score</a>
+                </div>
+                <div class="col-xs-6">
+                    <a href class="btn btn-success btn-lg btn-block" ng-click="nextGame()">Continue</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
