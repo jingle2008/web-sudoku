@@ -57,11 +57,7 @@ Cell.prototype.options = {
 };
 
 Cell.prototype.empty = function() {
-    return this.emptyVal(this.value);
-};
-
-Cell.prototype.emptyVal = function(value) {
-    return (value === emptyCellVal);
+    return (this.value === emptyCellVal);
 };
 
 Cell.prototype.isSolvable = function() {
@@ -287,7 +283,7 @@ function Puzzle(data, size) {
     self.emptyCells = 0;
     self.size = size;
     self.timeUsed = 0;
-    self.allCands = getAllCands(size);
+    self.allCands = self.getValues();
 
     // Operation
     self.reset = function() {
@@ -325,6 +321,18 @@ function Puzzle(data, size) {
 
         cell.selected = true;
         activeCell = cell;
+    };
+
+    self.selectNextCell = function(xOffset, yOffset) {
+        console.log(xOffset, yOffset);
+        if (activeCell === null) {
+            self.selectCell(self.getCell(0, 0));
+        }
+
+        var x = (activeCell.location.x + xOffset + size) % size;
+        var y = (activeCell.location.y + yOffset + size) % size;
+
+        self.selectCell(self.getCell(y, x));
     };
 
     // Private
@@ -375,6 +383,10 @@ Puzzle.prototype.getCell = function(row, col) {
     }
 
     return this.cells[row * size + col];
+};
+
+Puzzle.prototype.getValues = function() {
+    return getAllCands(this.size);
 };
 
 Puzzle.prototype.checkSolved = function() {

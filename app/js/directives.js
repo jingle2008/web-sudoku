@@ -92,7 +92,6 @@ angular.module('sudokuApp.directives', [])
 					autoStart: false,
 					callbacks: {
 						interval: function() {
-							console.log(clock.getTime().time);
 							scope.$apply(function() {
 								ngModel.$setViewValue(clock.getTime().time);
 							});
@@ -107,7 +106,7 @@ angular.module('sudokuApp.directives', [])
 				scope.$watch(attrs.action, function(val) {
 					if (val === 'start') {
 						clock.start();
-					} else if (val === "stop") {
+					} else if (val === 'stop') {
 						clock.stop();
 					}
 				});

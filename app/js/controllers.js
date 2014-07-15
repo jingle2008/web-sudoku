@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives', 'sudokuApp.services'])
+angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives', 'sudokuApp.services', 'cfp.hotkeys'])
 	.controller('MainMenuCtrl', ['$scope',
 		function($scope) {
 			$scope.isResumable = false;
@@ -79,8 +79,8 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 			$scope.name = 'Leader Boards';
 		}
 	])
-	.controller('GamePlayCtrl', ['$scope', 'GameOption', 'SudokuStore',
-		function($scope, GameOption, SudokuStore) {
+	.controller('GamePlayCtrl', ['$scope', 'hotkeys', 'GameOption', 'SudokuStore',
+		function($scope, hotkeys, GameOption, SudokuStore) {
 			var puzzles = [];
 			var puzzleData = [];
 
@@ -93,13 +93,17 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 			$scope.emptyLevel = false;
 
 			$scope.prevPuzzle = function() {
-				$scope.puzzleId--;
-				$scope.puzzle = getPuzzle();
+				if ($scope.canGoPrev()) {
+					$scope.puzzleId--;
+					$scope.puzzle = getPuzzle();
+				}
 			};
 
 			$scope.nextPuzzle = function() {
-				$scope.puzzleId++;
-				$scope.puzzle = getPuzzle();
+				if ($scope.canGoNext()) {
+					$scope.puzzleId++;
+					$scope.puzzle = getPuzzle();
+				}
 			};
 
 			$scope.canGoPrev = function() {
@@ -131,12 +135,16 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				if (puzzle === undefined) {
 					puzzles[idx] = puzzle = new Puzzle(puzzleData[idx], GameOption.size);
 				}
+
 				return puzzle;
-			};
+			}
 
 			function keyPress(letter) {
-				$scope.puzzle.setCell(letter);
+				if ($scope.readonly) {
+					return;
+				}
 
+				$scope.puzzle.setCell(letter);
 				checkSolved();
 			}
 
@@ -147,10 +155,75 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				}
 			}
 
-			function createKeypad(size, keys, command) {
-				var keypad = new Keypad(Math.sqrt(size));
-				keypad.addKeys(keys.split(''), command);
-				return keypad;
+			function setupInputMethods() {
+				var keys = $scope.puzzle.getValues();
+
+				createKeypad(keys);
+				createHotkeys(keys);
+			}
+
+			function createKeypad(keys) {
+				var keypad = new Keypad(Math.sqrt(keys.length));
+				keypad.addKeys(keys, keyPress);
+
+				keypad.addKey('Smart', function() {
+					Cell.prototype.options.smartCand = true;
+					$scope.puzzle.enableSmartCand(true);
+				});
+
+				keypad.addKey('Auto', function() {
+					$scope.puzzle.autoResolve();
+					checkSolved();
+				});
+
+				keypad.addKey('Reset', function() {
+					$scope.puzzle.reset();
+				});
+
+				$scope.keypad = keypad;
+			}
+
+			function createHotkeys(keys) {
+				hotkeys.bindTo($scope);
+				keys.forEach(function(key) {
+					hotkeys.add(key, function() {
+						keyPress(key);
+					});
+				});
+
+				hotkeys.add('up', 'Move the active cell up.', function() {
+					if (!$scope.readonly) {
+						$scope.puzzle.selectNextCell(0, -1);
+					}
+				});
+
+				hotkeys.add('down', 'Move the active cell down.', function() {
+					if (!$scope.readonly) {
+						$scope.puzzle.selectNextCell(0, 1);
+					}
+				});
+
+				hotkeys.add('left', 'Select previous level / move the active cell left.', function() {
+					if ($scope.readonly) {
+						$scope.prevPuzzle();
+					} else {
+						$scope.puzzle.selectNextCell(-1, 0);
+					}
+				});
+
+				hotkeys.add('right', 'Select next level / Move the active cell right.', function() {
+					if ($scope.readonly) {
+						$scope.nextPuzzle();
+					} else {
+						$scope.puzzle.selectNextCell(1, 0);
+					}
+				});
+
+				hotkeys.add('return', 'Start selected level.', function() {
+					if ($scope.readonly) {
+						$scope.startGame();
+					}
+				});
 			}
 
 			function initialize() {
@@ -169,21 +242,8 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 					} else {
 						$scope.puzzle = getPuzzle();
 						$scope.loading = false;
+						setupInputMethods();
 					}
-				});
-
-				$scope.keypad = createKeypad(GameOption.size, '123456789', keyPress);
-				$scope.keypad.addKey('Smart', function() {
-					Cell.prototype.options.smartCand = true;
-					$scope.puzzle.enableSmartCand(true);
-				});
-				$scope.keypad.addKey('Auto', function() {
-					$scope.puzzle.autoResolve();
-
-					checkSolved();
-				});
-				$scope.keypad.addKey('Reset', function() {
-					$scope.puzzle.reset();
 				});
 			}
 
