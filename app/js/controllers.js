@@ -8,6 +8,31 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 			$scope.isResumable = false;
 		}
 	])
+	.controller('LoginCtrl', ['$scope', 'User',
+		function($scope, User) {
+			$scope.auth = User;
+			$scope.busy = false;
+			$scope.message = null;
+			$scope.close = false;
+
+			$scope.signIn = function(email, password, rememberMe) {
+				$scope.busy = true;
+				$scope.message = null;
+
+				$scope.auth.$login('password', {
+					email: email,
+					password: password,
+					rememberMe: rememberMe
+				}).then(function(user) {
+					$scope.busy = false;
+					$scope.close = true;
+				}, function(error) {
+					$scope.busy = false;
+					$scope.message = error.message;
+				});
+			};
+		}
+	])
 	.controller('StartNewCtrl', ['$scope', 'GameOption',
 		function($scope, GameOption) {
 			$scope.numSolved = 100;

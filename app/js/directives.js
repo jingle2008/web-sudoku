@@ -148,4 +148,27 @@ angular.module('sudokuApp.directives', [])
 			transclude: true,
 			templateUrl: 'partials/jzsquare.html'
 		};
+	})
+	.directive('jzCloseDropdown', function() {
+		return {
+			restrict: 'A',
+			link: function(scope, element, attrs) {
+				scope.$watch(attrs.jzCloseDropdown, function(value) {
+					if (value) {
+						element.find('.dropdown-toggle').dropdown('toggle');
+					}
+				});
+			}
+		};
+	})
+	.directive('jzSignIn', function() {
+		return {
+			scope: {
+				busy: '=',
+				submit: '&',
+				message: '@'
+			},
+			restrict: 'E',
+			templateUrl: 'partials/jzsignin.html'
+		};
 	});

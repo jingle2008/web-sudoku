@@ -27,18 +27,36 @@
 </head>
 <body>
     <div class="container body-content">
-        <div class="navbar navbar-inverse navbar-fixed-top hidden-sm hidden-xs">
+        <div class="navbar navbar-default navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
                     <a href="#home" class="navbar-brand"><i class="fa fa-th fa-lg"></i> Super Sudoku</a>
                 </div>
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav navbar-right">
+                <div class="navbar-collapse collapse" id="navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right" ng-controller="LoginCtrl">
                         <li>
                             <a href="#home"><i class="fa fa-home fa-lg"></i> Home</a>
                         </li>
                         <li>
                             <a href jz-back-button><i class="fa fa-arrow-left fa-lg"></i> Back</a>
+                        </li>
+                        <li ng-show="auth.user">
+                            <a><i class="fa fa-user fa-lg"></i> {{auth.user.email}}</a>
+                        </li>
+                        <li ng-show="auth.user">
+                            <a href="#" ng-click="auth.$logout()"><i class="fa fa-sign-out fa-lg"></i> Logout</a>
+                        </li>
+                        <li ng-hide="auth.user" class="dropdown" jz-close-dropdown="close">
+                            <a class="dropdown-toggle" href data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> Sign In</a>
+                            <div class="dropdown-menu" style="padding: 15px; min-width: 270px;">
+                                <jz-sign-in busy="busy" message="{{message}}" submit="signIn(email, password, rememberMe)"></jz-sign-in>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -64,6 +82,7 @@
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/angular-toggle-switch/angular-toggle-switch.min.js"></script>
     <script src="bower_components/firebase/firebase.js"></script>
+    <script src="bower_components/firebase-simple-login/firebase-simple-login.js"></script>
     <script src="bower_components/angularfire/angularfire.min.js"></script>
     <script src="bower_components/FlipClock/compiled/flipclock.min.js"></script>
     <script src="bower_components/angular-hotkeys/build/hotkeys.min.js"></script>

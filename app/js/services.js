@@ -3,9 +3,9 @@
 /* Services */
 
 angular.module('sudokuApp.services', ['firebase'])
-	.factory('SudokuStore', ['$firebase', '$q',
-		function($firebase, $q) {
-			var url = 'https://websudoku.firebaseio.com';
+	.constant('firebaseUrl', 'https://websudoku.firebaseio.com')
+	.factory('SudokuStore', ['$firebase', '$q', 'firebaseUrl',
+		function($firebase, $q, firebaseUrl) {
 			var regions = [
 				'No extra regions',
 				'X-Sudoku',
@@ -22,26 +22,6 @@ angular.module('sudokuApp.services', ['firebase'])
 			];
 			var loadedPuzzles = {};
 
-			// var curStyle, curLevel;
-
-			// function styleUrl() {
-			// 	return url + '/' + curStyle;
-			// }
-
-			// function levelUrl() {
-			// 	return styleUrl() + '/' + curLevel;
-			// }
-
-			// function getChildren(path, children) {
-			// 	var ref = new Firebase(path);
-			// 	ref.once('value', function(snapshot) {
-			// 		snapshot.forEach(function(child) {
-			// 			children.push(child.name());
-			// 		});
-			// 	});
-			// }
-			// 
-
 			function getPuzzles(style, level, size) {
 				var deferred = $q.defer();
 
@@ -52,7 +32,7 @@ angular.module('sudokuApp.services', ['firebase'])
 				} else {
 					loadedPuzzles[key] = puzzles = [];
 
-					var path = [url, style, level, size];
+					var path = [firebaseUrl, style, level, size];
 					var puzzleRef = $firebase(new Firebase(path.join('/')));
 					puzzleRef.$on('child_added', function(child) {
 						puzzles.push(child.snapshot.value);
@@ -111,5 +91,10 @@ angular.module('sudokuApp.services', ['firebase'])
 					return this.levels[this.level];
 				}
 			};
+		}
+	]).factory('User', ['$firebase', '$firebaseSimpleLogin', 'firebaseUrl',
+		function($firebase, $firebaseSimpleLogin, firebaseUrl) {
+			var ref = new Firebase(firebaseUrl);
+			return $firebaseSimpleLogin(ref);
 		}
 	]);

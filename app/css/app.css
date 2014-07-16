@@ -7,14 +7,6 @@ body {
     font-family: 'Lato',verdana, sans-serif;
 }
 
-@media (max-width: 970px) {
-    body {
-        padding-top: 0;
-        padding-bottom: 0;
-        font-family: 'Lato',verdana, sans-serif;
-    }
-}
-
 .square {
     float: left;
     position: relative;
