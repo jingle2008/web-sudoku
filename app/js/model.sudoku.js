@@ -42,6 +42,10 @@ function Cell(value, fixed, row, column, regionId, puzzle) {
     function initialize(val) {
         self.value = val;
 
+        if (self.empty()) {
+            self.puzzle.emptyCells++;
+        }
+
         if (self.options.smartCand && self.empty()) {
             self.candidates = puzzle.allCands.slice(0);
         } else {
@@ -239,6 +243,7 @@ function HighlightManager() {
     }
 
     self.build = function(cells) {
+        groups = {};
         var dict = cells.groupBy(getCellValue);
 
         for (var key in dict) {
@@ -271,7 +276,6 @@ function HighlightManager() {
 
 function Puzzle(data, size) {
     var self = this;
-    var fixed = [];
     var activeCell = null;
     var highlightMgr = new HighlightManager();
 
@@ -282,16 +286,28 @@ function Puzzle(data, size) {
     self.regCells = [];
     self.emptyCells = 0;
     self.size = size;
-    self.timeUsed = 0;
+    self.id = data.id;
+    self.completed = data.result ? data.result.status > 0 : false;
+    self.timeUsed = data.result ? data.result.timeUsed : 0;
     self.allCands = self.getValues();
 
     // Operation
     self.reset = function() {
-        fixed.forEach(function(elem, idx) {
-            if (!elem) {
-                self.cells[idx].reset();
+        data.result = null;
+        self.timeUsed = 0;
+        self.completed = false;
+        var filledCells = [];
+
+        self.cells.forEach(function(cell) {
+            if (!cell.fixed) {
+                cell.reset();
+            } else {
+                filledCells.push(cell);
             }
         });
+
+        setupPlay(filledCells);
+        console.log(self.emptyCells);
     };
 
     self.setCell = function(value) {
@@ -324,7 +340,6 @@ function Puzzle(data, size) {
     };
 
     self.selectNextCell = function(xOffset, yOffset) {
-        console.log(xOffset, yOffset);
         if (activeCell === null) {
             self.selectCell(self.getCell(0, 0));
         }
@@ -336,6 +351,14 @@ function Puzzle(data, size) {
     };
 
     // Private
+    function setupPlay(filledCells) {
+        if (Cell.prototype.options.smartCand) {
+            filledCells.forEach(Puzzle.prototype.update.bind(self));
+        }
+
+        highlightMgr.build(filledCells);
+    }
+
     function initialize() {
         var index = 0;
         var filledCells = [];
@@ -347,7 +370,7 @@ function Puzzle(data, size) {
         for (var r = 0; r < size; r++) {
             for (var c = 0; c < size; c++) {
                 var empty = data.mask[index] === '1';
-                var value = empty ? emptyCellVal : data.puzzle[index];
+                var value = (empty && !self.completed) ? emptyCellVal : data.puzzle[index];
                 var rid = Math.floor(r / 3) * 3 + Math.floor(c / 3);
                 var cell = new Cell(value, !empty, r, c, rid, self);
 
@@ -356,7 +379,7 @@ function Puzzle(data, size) {
                 self.regCells[rid].push(cell);
                 self.cells.push(cell);
 
-                if (!empty) {
+                if (!self.completed && !empty) {
                     filledCells.push(cell);
                 }
 
@@ -364,12 +387,9 @@ function Puzzle(data, size) {
             }
         }
 
-        self.emptyCells = index - filledCells.length;
-        if (Cell.prototype.options.smartCand) {
-            filledCells.forEach(Puzzle.prototype.update.bind(self));
+        if (!self.completed) {
+            setupPlay(filledCells);
         }
-
-        highlightMgr.build(filledCells);
     }
 
     initialize();
@@ -394,7 +414,9 @@ Puzzle.prototype.checkSolved = function() {
         return false;
     }
 
-    return this.validate();
+    this.completed = this.validate();
+
+    return this.completed;
 };
 
 Puzzle.prototype.validate = function() {

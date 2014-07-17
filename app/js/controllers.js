@@ -8,9 +8,9 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 			$scope.isResumable = false;
 		}
 	])
-	.controller('LoginCtrl', ['$scope', 'User',
-		function($scope, User) {
-			$scope.auth = User;
+	.controller('LoginCtrl', ['$scope', 'UserService',
+		function($scope, UserService) {
+			$scope.auth = UserService.auth;
 			$scope.busy = false;
 			$scope.message = null;
 			$scope.close = false;
@@ -26,10 +26,16 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				}).then(function(user) {
 					$scope.busy = false;
 					$scope.close = true;
+					UserService.setUserId(user.id);
 				}, function(error) {
 					$scope.busy = false;
 					$scope.message = error.message;
 				});
+			};
+
+			$scope.signOut = function() {
+				$scope.auth.$logout();
+				UserService.setUserId(null);
 			};
 		}
 	])
@@ -104,8 +110,8 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 			$scope.name = 'Leader Boards';
 		}
 	])
-	.controller('GamePlayCtrl', ['$scope', 'hotkeys', 'GameOption', 'SudokuStore',
-		function($scope, hotkeys, GameOption, SudokuStore) {
+	.controller('GamePlayCtrl', ['$scope', 'hotkeys', 'GameOption', 'SudokuStore', 'UserService',
+		function($scope, hotkeys, GameOption, SudokuStore, UserService) {
 			var puzzles = [];
 			var puzzleData = [];
 
@@ -144,8 +150,10 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				$scope.timerAction = 'start';
 			};
 
-			$scope.submitScore = function() {
-				alert('not implemented');
+			$scope.resetGame = function() {
+				$scope.puzzle.reset();
+				SudokuStore.resetGame($scope.puzzle.id, UserService.getUserId());
+				$scope.startGame();
 			};
 
 			$scope.nextGame = function() {
@@ -177,6 +185,8 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				if ($scope.puzzle.checkSolved()) {
 					$scope.timerAction = 'stop';
 					$scope.solved = true;
+
+					SudokuStore.saveScore($scope.puzzle.id, UserService.getUserId(), $scope.puzzle.timeUsed);
 				}
 			}
 
@@ -251,6 +261,17 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				});
 			}
 
+			function getUnfinished() {
+				for (var i = 0; i < puzzleData.length; i++) {
+					var result = puzzleData[i].result;
+					if (!result || result.status === 0) {
+						return i;
+					}
+				}
+
+				return -1;
+			}
+
 			function initialize() {
 				var l = GameOption.levelName();
 				var r = GameOption.regionName();
@@ -259,12 +280,13 @@ angular.module('sudokuApp.controllers', ['toggle-switch', 'sudokuApp.directives'
 				$scope.difficulty = l;
 				$scope.displayName = s + '-' + r;
 
-				SudokuStore.getPuzzles(s, l, GameOption.size).then(function(data) {
+				SudokuStore.getPuzzles(s, l, GameOption.size, UserService.getUserId()).then(function(data) {
 					puzzleData = data;
 					$scope.totalPuzzles = puzzleData.length;
 					if (puzzleData.length === 0) {
 						$scope.emptyLevel = true;
 					} else {
+						$scope.puzzleId = getUnfinished();
 						$scope.puzzle = getPuzzle();
 						$scope.loading = false;
 						setupInputMethods();

@@ -15,6 +15,7 @@
     "font-awesome": "~4.1.0",
     "angular-toggle-switch": "0.3.0",
     "angularfire": "0.7.1",
-    "FlipClock": "0.4.0"
+    "FlipClock": "0.4.0",
+    "jquery.cookie": "1.4.1"
   }
 }
