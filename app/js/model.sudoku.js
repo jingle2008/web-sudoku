@@ -296,6 +296,7 @@ function Puzzle(data, size) {
         data.result = null;
         self.timeUsed = 0;
         self.completed = false;
+        self.emptyCells = 0;
         var filledCells = [];
 
         self.cells.forEach(function(cell) {
@@ -362,6 +363,11 @@ function Puzzle(data, size) {
     function initialize() {
         var index = 0;
         var filledCells = [];
+        var puzzleString = data.puzzle;
+        var loadedState = (data.result && data.result.status === 0);
+        if (loadedState) {
+            puzzleString = data.result.puzzle;
+        }
 
         self.rowCells.make2d(size);
         self.colCells.make2d(size);
@@ -369,17 +375,17 @@ function Puzzle(data, size) {
 
         for (var r = 0; r < size; r++) {
             for (var c = 0; c < size; c++) {
-                var empty = data.mask[index] === '1';
-                var value = (empty && !self.completed) ? emptyCellVal : data.puzzle[index];
+                var fixed = data.mask[index] === '0';
+                var value = (fixed || loadedState || self.completed) ? puzzleString[index] : emptyCellVal;
                 var rid = Math.floor(r / 3) * 3 + Math.floor(c / 3);
-                var cell = new Cell(value, !empty, r, c, rid, self);
+                var cell = new Cell(value, fixed, r, c, rid, self);
 
                 self.rowCells[r].push(cell);
                 self.colCells[c].push(cell);
                 self.regCells[rid].push(cell);
                 self.cells.push(cell);
 
-                if (!self.completed && !empty) {
+                if (!self.completed && !cell.empty()) {
                     filledCells.push(cell);
                 }
 
@@ -452,6 +458,12 @@ Puzzle.prototype.getCellsInReg = function(regionId) {
 Puzzle.prototype.getSameValCells = function(value) {
     return this.cells.filter(function(cell) {
         return (value === cell.value);
+    });
+};
+
+Puzzle.prototype.getCellValues = function() {
+    return this.cells.map(function(cell) {
+        return cell.value;
     });
 };
 
